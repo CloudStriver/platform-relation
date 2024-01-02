@@ -1,0 +1,44 @@
+Name: platform-relation
+ListenOn: 0.0.0.0:2004
+Mode: dev
+Elasticsearch:
+    Addresses:
+      - http://localhost:9200
+    Username: elastic
+    Password:
+##Monitoring
+Prometheus:
+  Host: 0.0.0.0
+  Port: 4004
+  Path: /metrics
+
+##Link Tracking
+Telemetry:
+  Name: platform-relation
+  Endpoint: http://localhost:14268/api/traces
+  Sampler: 1.0
+  Batcher: jaeger
+
+Log:
+  ServiceName: platform-relation
+  Level: info
+  Mode: console
+  Encoding: plain
+
+Redis:
+  Host: localhost:36379
+  Type: node
+  Pass: admin
+  Key: ""
+Mongo:
+  Url: mongodb://localhost:27015/?connect=direct
+  DB: platform_relation
+
+CacheConf:
+  - Host: localhost:36379
+    Pass: admin
+
+EtcdConf:
+  Hosts:
+    - localhost:2379
+
