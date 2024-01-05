@@ -85,11 +85,17 @@ func (s *RelationServiceImpl) CreateRelation(ctx context.Context, req *genrelati
 }
 
 func (s *RelationServiceImpl) GetRelation(ctx context.Context, req *genrelation.GetRelationReq) (resp *genrelation.GetRelationResp, err error) {
-	r, err := s.RelationModel.FindOne(ctx, convertor.RelationInfoToRelationMongoMapperFilterOptions(req.RelationInfo))
-	if err != nil {
+	resp = new(genrelation.GetRelationResp)
+	_, err = s.RelationModel.FindOne(ctx, convertor.RelationInfoToRelationMongoMapperFilterOptions(req.RelationInfo))
+	switch {
+	case errors.Is(err, consts.ErrNotFound):
+		resp.Ok = false
+		return resp, nil
+	case err != nil:
 		log.CtxError(ctx, "查询关系异常[%v]\n", err)
 		return resp, err
+	default:
+		return resp, nil
+
 	}
-	resp.Relation = convertor.RelationMapperToRelation(r)
-	return resp, nil
 }
