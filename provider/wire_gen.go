@@ -21,12 +21,12 @@ func NewRelationServerImpl() (*adaptor.RelationServerImpl, error) {
 	if err != nil {
 		return nil, err
 	}
-	relationMongoMapper := relation.NewMongoMapper(configConfig)
 	redisRedis := redis.NewRedis(configConfig)
+	relationNeo4jMapper := relation.NewNeo4jMapper(configConfig)
 	relationServiceImpl := &service.RelationServiceImpl{
 		Config:        configConfig,
-		RelationModel: relationMongoMapper,
 		Redis:         redisRedis,
+		RelationModel: relationNeo4jMapper,
 	}
 	relationServerImpl := &adaptor.RelationServerImpl{
 		Config:          configConfig,

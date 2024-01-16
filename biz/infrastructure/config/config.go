@@ -14,14 +14,15 @@ type EtcdConf struct {
 
 type Config struct {
 	service.ServiceConf
-	ListenOn string
-	Mongo    struct {
-		URL string
-		DB  string
-	}
+	ListenOn  string
 	CacheConf cache.CacheConf
 	Redis     *redis.RedisConf
-	EtcdConf  EtcdConf
+	Neo4jConf struct {
+		Url      string
+		Username string
+		Password string
+		DataBase string
+	}
 }
 
 func NewConfig() (*Config, error) {

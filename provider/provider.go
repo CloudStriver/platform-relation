@@ -24,5 +24,5 @@ var InfrastructureSet = wire.NewSet(
 )
 
 var MapperSet = wire.NewSet(
-	relation.NewMongoMapper,
+	relation.NewNeo4jMapper,
 )
