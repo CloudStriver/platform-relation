@@ -17,22 +17,6 @@ type Neo4jFilter struct {
 	*FilterOptions
 }
 
-func makeNeo4jFilter(options *FilterOptions) map[string]any {
-	return (&Neo4jFilter{
-		m:             make(map[string]any, 5),
-		FilterOptions: options,
-	}).toMap()
-}
-
-func (f *Neo4jFilter) toMap() map[string]any {
-	f.CheckOnlyFromType()
-	f.CheckOnlyFromId()
-	f.CheckOnlyToType()
-	f.CheckOnlyToId()
-	f.CheckOnlyRelationType()
-	return f.m
-}
-
 func (f *Neo4jFilter) CheckOnlyToId() {
 	if f.OnlyToId != nil {
 		f.m[consts.ToId] = *f.OnlyToId
