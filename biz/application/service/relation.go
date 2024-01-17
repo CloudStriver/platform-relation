@@ -33,9 +33,9 @@ func (s *RelationServiceImpl) GetRelationCount(ctx context.Context, req *genrela
 	resp = new(genrelation.GetRelationCountResp)
 	switch o := req.RelationFilterOptions.(type) {
 	case *genrelation.GetRelationCountReq_FromFilterOptions:
-		resp.Total, err = s.RelationModel.MatchFromEdgesCount(ctx, o.FromFilterOptions.GetOnlyFromType(), o.FromFilterOptions.GetOnlyFromId(), req.OnlyRelationType)
+		resp.Total, err = s.RelationModel.MatchFromEdgesCount(ctx, o.FromFilterOptions.FromType, o.FromFilterOptions.FromId, o.FromFilterOptions.ToType, req.RelationType)
 	case *genrelation.GetRelationCountReq_ToFilterOptions:
-		resp.Total, err = s.RelationModel.MatchToEdgesCount(ctx, o.ToFilterOptions.GetOnlyToType(), o.ToFilterOptions.GetOnlyToId(), req.OnlyRelationType)
+		resp.Total, err = s.RelationModel.MatchToEdgesCount(ctx, o.ToFilterOptions.ToType, o.ToFilterOptions.ToId, o.ToFilterOptions.FromType, req.RelationType)
 	}
 	if err != nil {
 		return resp, err
@@ -47,9 +47,11 @@ func (s *RelationServiceImpl) GetRelations(ctx context.Context, req *genrelation
 	resp = new(genrelation.GetRelationsResp)
 	switch o := req.RelationFilterOptions.(type) {
 	case *genrelation.GetRelationsReq_FromFilterOptions:
-		resp.Relations, resp.Total, err = s.RelationModel.MatchFromEdgesAndCount(ctx, o.FromFilterOptions.OnlyFromType, o.FromFilterOptions.OnlyFromId, req.OnlyRelationType, pconvertor.PaginationOptionsToModelPaginationOptions(req.PaginationOptions))
+		resp.Relations, resp.Total, err = s.RelationModel.MatchFromEdgesAndCount(ctx, o.FromFilterOptions.FromType, o.FromFilterOptions.FromId, o.FromFilterOptions.ToType,
+			req.RelationType, pconvertor.PaginationOptionsToModelPaginationOptions(req.PaginationOptions))
 	case *genrelation.GetRelationsReq_ToFilterOptions:
-		resp.Relations, resp.Total, err = s.RelationModel.MatchToEdgesAndCount(ctx, o.ToFilterOptions.OnlyToType, o.ToFilterOptions.OnlyToId, req.OnlyRelationType, pconvertor.PaginationOptionsToModelPaginationOptions(req.PaginationOptions))
+		resp.Relations, resp.Total, err = s.RelationModel.MatchToEdgesAndCount(ctx, o.ToFilterOptions.ToType, o.ToFilterOptions.ToId, o.ToFilterOptions.FromType,
+			req.RelationType, pconvertor.PaginationOptionsToModelPaginationOptions(req.PaginationOptions))
 	}
 	if err != nil {
 		return resp, err
