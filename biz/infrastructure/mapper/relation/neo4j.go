@@ -8,6 +8,9 @@ import (
 	genrelation "github.com/CloudStriver/service-idl-gen-go/kitex_gen/platform/relation"
 	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
 	"github.com/zeromicro/go-zero/core/mr"
+	"github.com/zeromicro/go-zero/core/trace"
+	"go.opentelemetry.io/otel"
+	oteltrace "go.opentelemetry.io/otel/trace"
 	"time"
 )
 
@@ -85,6 +88,9 @@ func (n Neo4jMapper) MatchToEdgesAndCount(ctx context.Context, toType int64, toI
 }
 
 func (n Neo4jMapper) MatchFromEdgesCount(ctx context.Context, fromType int64, fromId string, toType int64, relationType int64) (int64, error) {
+	tracer := otel.GetTracerProvider().Tracer(trace.TraceName)
+	_, span := tracer.Start(ctx, "neo4j.MatchFromEdgesCount", oteltrace.WithSpanKind(oteltrace.SpanKindConsumer))
+	defer span.End()
 	result, err := neo4j.ExecuteQuery(ctx, n.conn, "MATCH (n1:node{name: $FromId, type: $FromType})-[r:edge{type: $RelationType}]->(n2:node{type: $ToType}) RETURN COUNT(r)",
 		map[string]any{
 			"FromId":       fromId,
@@ -105,6 +111,9 @@ func (n Neo4jMapper) MatchFromEdgesCount(ctx context.Context, fromType int64, fr
 }
 
 func (n Neo4jMapper) MatchToEdgesCount(ctx context.Context, toType int64, toId string, fromType int64, relationType int64) (int64, error) {
+	tracer := otel.GetTracerProvider().Tracer(trace.TraceName)
+	_, span := tracer.Start(ctx, "neo4j.MatchToEdgesCount", oteltrace.WithSpanKind(oteltrace.SpanKindConsumer))
+	defer span.End()
 	result, err := neo4j.ExecuteQuery(ctx, n.conn, "MATCH (n1:node{type: $FromType})-[r:edge{type: $RelationType}]->(n2:node{name: $ToId, type: $ToType}) RETURN COUNT(r)",
 		map[string]any{
 			"ToId":         toId,
@@ -125,6 +134,9 @@ func (n Neo4jMapper) MatchToEdgesCount(ctx context.Context, toType int64, toId s
 }
 
 func (n Neo4jMapper) MatchFromEdges(ctx context.Context, fromType int64, fromId string, toType int64, relationType int64, options *pagination.PaginationOptions) ([]*genrelation.Relation, error) {
+	tracer := otel.GetTracerProvider().Tracer(trace.TraceName)
+	_, span := tracer.Start(ctx, "neo4j.MatchFromEdges", oteltrace.WithSpanKind(oteltrace.SpanKindConsumer))
+	defer span.End()
 	options.EnsureSafe()
 	result, err := neo4j.ExecuteQuery(ctx, n.conn,
 		"MATCH (n1:node{name: $FromId, type: $FromType})-[r:edge{type: $RelationType}]->(n2:node{type:$ToType}) RETURN n2,r ORDER BY r.createTime DESC SKIP $Offset LIMIT $Limit",
@@ -181,6 +193,10 @@ func (n Neo4jMapper) MatchFromEdges(ctx context.Context, fromType int64, fromId 
 }
 
 func (n Neo4jMapper) MatchToEdges(ctx context.Context, toType int64, toId string, fromType int64, relationType int64, options *pagination.PaginationOptions) ([]*genrelation.Relation, error) {
+	tracer := otel.GetTracerProvider().Tracer(trace.TraceName)
+	_, span := tracer.Start(ctx, "neo4j.MatchToEdges", oteltrace.WithSpanKind(oteltrace.SpanKindConsumer))
+	defer span.End()
+	options.EnsureSafe()
 	result, err := neo4j.ExecuteQuery(ctx, n.conn,
 		"MATCH (n1:node{type:$FromType})-[r:edge{type:$RelationType}]->(n2:node{name:$ToId,type:$ToType}) RETURN n1,r ORDER BY r.createTime DESC SKIP $Offset LIMIT $Limit",
 		map[string]any{
@@ -234,6 +250,9 @@ func (n Neo4jMapper) MatchToEdges(ctx context.Context, toType int64, toId string
 }
 
 func (n Neo4jMapper) CreateEdge(ctx context.Context, relation *genrelation.RelationInfo) error {
+	tracer := otel.GetTracerProvider().Tracer(trace.TraceName)
+	_, span := tracer.Start(ctx, "neo4j.CreateEdge", oteltrace.WithSpanKind(oteltrace.SpanKindConsumer))
+	defer span.End()
 	if _, err := neo4j.ExecuteQuery(ctx, n.conn,
 		"MERGE (n1:node{name: $FromId, type: $FromType}) MERGE (n2:node{name: $ToId, type: $ToType}) CREATE (n1)-[r:edge{type: $RelationType, createTime:$CreateTime}]->(n2)",
 		map[string]any{
@@ -251,6 +270,9 @@ func (n Neo4jMapper) CreateEdge(ctx context.Context, relation *genrelation.Relat
 }
 
 func (n Neo4jMapper) MatchEdge(ctx context.Context, relation *genrelation.RelationInfo) (bool, error) {
+	tracer := otel.GetTracerProvider().Tracer(trace.TraceName)
+	_, span := tracer.Start(ctx, "neo4j.MatchEdge", oteltrace.WithSpanKind(oteltrace.SpanKindConsumer))
+	defer span.End()
 	result, err := neo4j.ExecuteQuery(ctx, n.conn,
 		"MATCH (n1:node{name: $FromId, type: $FromType})-[r:edge{type: $RelationType}]->(n2:node{name: $ToId, type: $ToType}) return r",
 		map[string]any{
@@ -269,6 +291,9 @@ func (n Neo4jMapper) MatchEdge(ctx context.Context, relation *genrelation.Relati
 }
 
 func (n Neo4jMapper) DeleteEdge(ctx context.Context, relation *genrelation.RelationInfo) error {
+	tracer := otel.GetTracerProvider().Tracer(trace.TraceName)
+	_, span := tracer.Start(ctx, "neo4j.DeleteEdge", oteltrace.WithSpanKind(oteltrace.SpanKindConsumer))
+	defer span.End()
 	if _, err := neo4j.ExecuteQuery(ctx, n.conn,
 		"MATCH (n1:node{name: $FromId, type: $FromType})-[r:edge{type: $RelationType}]->(n2:node{name: $ToId, type: $ToType}) DELETE r",
 		map[string]any{
