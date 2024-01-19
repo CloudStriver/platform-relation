@@ -20,9 +20,9 @@ var _ RelationNeo4jMapper = (*Neo4jMapper)(nil)
 
 type (
 	RelationNeo4jMapper interface {
-		CreateEdge(ctx context.Context, relation *genrelation.RelationInfo) error
-		MatchEdge(ctx context.Context, relation *genrelation.RelationInfo) (bool, error)
-		DeleteEdge(ctx context.Context, relation *genrelation.RelationInfo) error
+		CreateEdge(ctx context.Context, relation *genrelation.Relation) error
+		MatchEdge(ctx context.Context, relation *genrelation.Relation) (bool, error)
+		DeleteEdge(ctx context.Context, relation *genrelation.Relation) error
 		MatchFromEdges(ctx context.Context, fromType int64, fromId string, toType int64, relationType int64, options *pagination.PaginationOptions) ([]*genrelation.Relation, error)
 		MatchToEdges(ctx context.Context, toType int64, toId string, fromType int64, relationType int64, options *pagination.PaginationOptions) ([]*genrelation.Relation, error)
 		MatchFromEdgesCount(ctx context.Context, fromType int64, fromId string, toType int64, relationType int64) (int64, error)
@@ -249,7 +249,7 @@ func (n Neo4jMapper) MatchToEdges(ctx context.Context, toType int64, toId string
 	return relation, nil
 }
 
-func (n Neo4jMapper) CreateEdge(ctx context.Context, relation *genrelation.RelationInfo) error {
+func (n Neo4jMapper) CreateEdge(ctx context.Context, relation *genrelation.Relation) error {
 	tracer := otel.GetTracerProvider().Tracer(trace.TraceName)
 	_, span := tracer.Start(ctx, "neo4j.CreateEdge", oteltrace.WithSpanKind(oteltrace.SpanKindConsumer))
 	defer span.End()
@@ -269,7 +269,7 @@ func (n Neo4jMapper) CreateEdge(ctx context.Context, relation *genrelation.Relat
 	return nil
 }
 
-func (n Neo4jMapper) MatchEdge(ctx context.Context, relation *genrelation.RelationInfo) (bool, error) {
+func (n Neo4jMapper) MatchEdge(ctx context.Context, relation *genrelation.Relation) (bool, error) {
 	tracer := otel.GetTracerProvider().Tracer(trace.TraceName)
 	_, span := tracer.Start(ctx, "neo4j.MatchEdge", oteltrace.WithSpanKind(oteltrace.SpanKindConsumer))
 	defer span.End()
@@ -290,7 +290,7 @@ func (n Neo4jMapper) MatchEdge(ctx context.Context, relation *genrelation.Relati
 	return len(result.Records) != 0, nil
 }
 
-func (n Neo4jMapper) DeleteEdge(ctx context.Context, relation *genrelation.RelationInfo) error {
+func (n Neo4jMapper) DeleteEdge(ctx context.Context, relation *genrelation.Relation) error {
 	tracer := otel.GetTracerProvider().Tracer(trace.TraceName)
 	_, span := tracer.Start(ctx, "neo4j.DeleteEdge", oteltrace.WithSpanKind(oteltrace.SpanKindConsumer))
 	defer span.End()
