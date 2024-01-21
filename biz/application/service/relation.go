@@ -45,13 +45,14 @@ func (s *RelationServiceImpl) GetRelationCount(ctx context.Context, req *genrela
 
 func (s *RelationServiceImpl) GetRelations(ctx context.Context, req *genrelation.GetRelationsReq) (resp *genrelation.GetRelationsResp, err error) {
 	resp = new(genrelation.GetRelationsResp)
+	p := pconvertor.PaginationOptionsToModelPaginationOptions(req.PaginationOptions)
 	switch o := req.RelationFilterOptions.(type) {
 	case *genrelation.GetRelationsReq_FromFilterOptions:
 		resp.Relations, resp.Total, err = s.RelationModel.MatchFromEdgesAndCount(ctx, o.FromFilterOptions.FromType, o.FromFilterOptions.FromId, o.FromFilterOptions.ToType,
-			req.RelationType, pconvertor.PaginationOptionsToModelPaginationOptions(req.PaginationOptions))
+			req.RelationType, p)
 	case *genrelation.GetRelationsReq_ToFilterOptions:
 		resp.Relations, resp.Total, err = s.RelationModel.MatchToEdgesAndCount(ctx, o.ToFilterOptions.ToType, o.ToFilterOptions.ToId, o.ToFilterOptions.FromType,
-			req.RelationType, pconvertor.PaginationOptionsToModelPaginationOptions(req.PaginationOptions))
+			req.RelationType, p)
 	}
 	if err != nil {
 		return resp, err
@@ -61,7 +62,7 @@ func (s *RelationServiceImpl) GetRelations(ctx context.Context, req *genrelation
 
 func (s *RelationServiceImpl) DeleteRelation(ctx context.Context, req *genrelation.DeleteRelationReq) (resp *genrelation.DeleteRelationResp, err error) {
 	resp = new(genrelation.DeleteRelationResp)
-	if err = s.RelationModel.DeleteEdge(ctx, req.RelationInfo); err != nil {
+	if err = s.RelationModel.DeleteEdge(ctx, req.Relation); err != nil {
 		return resp, err
 	}
 	return resp, nil
@@ -69,12 +70,12 @@ func (s *RelationServiceImpl) DeleteRelation(ctx context.Context, req *genrelati
 
 func (s *RelationServiceImpl) CreateRelation(ctx context.Context, req *genrelation.CreateRelationReq) (resp *genrelation.CreateRelationResp, err error) {
 	resp = new(genrelation.CreateRelationResp)
-	ok, err := s.RelationModel.MatchEdge(ctx, req.RelationInfo)
+	ok, err := s.RelationModel.MatchEdge(ctx, req.Relation)
 	if err != nil {
 		return resp, err
 	}
 	if !ok {
-		if err = s.RelationModel.CreateEdge(ctx, req.RelationInfo); err != nil {
+		if err = s.RelationModel.CreateEdge(ctx, req.Relation); err != nil {
 			return resp, err
 		}
 	}
@@ -83,7 +84,7 @@ func (s *RelationServiceImpl) CreateRelation(ctx context.Context, req *genrelati
 
 func (s *RelationServiceImpl) GetRelation(ctx context.Context, req *genrelation.GetRelationReq) (resp *genrelation.GetRelationResp, err error) {
 	resp = new(genrelation.GetRelationResp)
-	if resp.Ok, err = s.RelationModel.MatchEdge(ctx, req.RelationInfo); err != nil {
+	if resp.Ok, err = s.RelationModel.MatchEdge(ctx, req.Relation); err != nil {
 		return resp, err
 	}
 	return resp, nil
