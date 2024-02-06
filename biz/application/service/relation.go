@@ -62,7 +62,13 @@ func (s *RelationServiceImpl) GetRelations(ctx context.Context, req *genrelation
 
 func (s *RelationServiceImpl) DeleteRelation(ctx context.Context, req *genrelation.DeleteRelationReq) (resp *genrelation.DeleteRelationResp, err error) {
 	resp = new(genrelation.DeleteRelationResp)
-	if err = s.RelationModel.DeleteEdge(ctx, req.Relation); err != nil {
+	if err = s.RelationModel.DeleteEdge(ctx, &genrelation.Relation{
+		FromType:     req.FromType,
+		FromId:       req.FromId,
+		ToType:       req.ToType,
+		ToId:         req.ToId,
+		RelationType: req.RelationType,
+	}); err != nil {
 		return resp, err
 	}
 	return resp, nil
@@ -70,12 +76,24 @@ func (s *RelationServiceImpl) DeleteRelation(ctx context.Context, req *genrelati
 
 func (s *RelationServiceImpl) CreateRelation(ctx context.Context, req *genrelation.CreateRelationReq) (resp *genrelation.CreateRelationResp, err error) {
 	resp = new(genrelation.CreateRelationResp)
-	ok, err := s.RelationModel.MatchEdge(ctx, req.Relation)
+	ok, err := s.RelationModel.MatchEdge(ctx, &genrelation.Relation{
+		FromType:     req.FromType,
+		FromId:       req.FromId,
+		ToType:       req.ToType,
+		ToId:         req.ToId,
+		RelationType: req.RelationType,
+	})
 	if err != nil {
 		return resp, err
 	}
 	if !ok {
-		if err = s.RelationModel.CreateEdge(ctx, req.Relation); err != nil {
+		if err = s.RelationModel.CreateEdge(ctx, &genrelation.Relation{
+			FromType:     req.FromType,
+			FromId:       req.FromId,
+			ToType:       req.ToType,
+			ToId:         req.ToId,
+			RelationType: req.RelationType,
+		}); err != nil {
 			return resp, err
 		}
 	}
