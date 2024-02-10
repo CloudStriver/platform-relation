@@ -61,7 +61,6 @@ func (s *RelationServiceImpl) GetRelations(ctx context.Context, req *genrelation
 }
 
 func (s *RelationServiceImpl) DeleteRelation(ctx context.Context, req *genrelation.DeleteRelationReq) (resp *genrelation.DeleteRelationResp, err error) {
-	resp = new(genrelation.DeleteRelationResp)
 	if err = s.RelationModel.DeleteEdge(ctx, &genrelation.Relation{
 		FromType:     req.FromType,
 		FromId:       req.FromId,
@@ -96,13 +95,20 @@ func (s *RelationServiceImpl) CreateRelation(ctx context.Context, req *genrelati
 		}); err != nil {
 			return resp, err
 		}
+		resp.Ok = true
 	}
 	return resp, nil
 }
 
 func (s *RelationServiceImpl) GetRelation(ctx context.Context, req *genrelation.GetRelationReq) (resp *genrelation.GetRelationResp, err error) {
 	resp = new(genrelation.GetRelationResp)
-	if resp.Ok, err = s.RelationModel.MatchEdge(ctx, req.Relation); err != nil {
+	if resp.Ok, err = s.RelationModel.MatchEdge(ctx, &genrelation.Relation{
+		FromType:     req.FromType,
+		FromId:       req.FromId,
+		ToType:       req.ToType,
+		ToId:         req.ToId,
+		RelationType: req.RelationType,
+	}); err != nil {
 		return resp, err
 	}
 	return resp, nil
