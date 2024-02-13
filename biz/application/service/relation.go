@@ -97,6 +97,18 @@ func (s *RelationServiceImpl) CreateRelation(ctx context.Context, req *genrelati
 		}
 		resp.Ok = true
 	}
+
+	if ok && req.IsOnly {
+		if err = s.RelationModel.DeleteEdge(ctx, &genrelation.Relation{
+			FromType:     req.FromType,
+			FromId:       req.FromId,
+			ToType:       req.ToType,
+			ToId:         req.ToId,
+			RelationType: req.RelationType,
+		}); err != nil {
+			return resp, err
+		}
+	}
 	return resp, nil
 }
 
