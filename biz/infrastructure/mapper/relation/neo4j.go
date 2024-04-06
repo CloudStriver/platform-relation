@@ -29,12 +29,87 @@ type (
 		MatchToEdgesCount(ctx context.Context, toType int64, toId string, fromType int64, relationType int64) (int64, error)
 		MatchFromEdgesAndCount(ctx context.Context, fromType int64, fromId string, toType int64, relationType int64, options *pagination.PaginationOptions) ([]*genrelation.Relation, int64, error)
 		MatchToEdgesAndCount(ctx context.Context, toType int64, toId string, fromType int64, relationType int64, options *pagination.PaginationOptions) ([]*genrelation.Relation, int64, error)
+		GetRelationPaths(ctx context.Context, fromType int64, fromId string, type1 int64, type2 int64, options *pagination.PaginationOptions) ([]*genrelation.Relation, error)
 	}
 	Neo4jMapper struct {
 		conn     neo4j.DriverWithContext
 		DataBase string
 	}
 )
+
+func (n Neo4jMapper) GetRelationPaths(ctx context.Context, fromType int64, fromId string, type1 int64, type2 int64, options *pagination.PaginationOptions) ([]*genrelation.Relation, error) {
+	options.EnsureSafe()
+	result, err := neo4j.ExecuteQuery(ctx, n.conn, "MATCH path=(node1:node {name: $FromId, type: $FromType})-[r1:edge {type: $Type1}]->(node2:node)-[r2:edge {type: $Type2}]->(node3:node) RETURN node2,node3,r2 ORDER BY r2.createTime DESC SKIP $Offset LIMIT $Limit",
+		map[string]any{
+			"Offset":   *options.Offset,
+			"Limit":    *options.Limit,
+			"FromId":   fromId,
+			"FromType": fromType,
+			"Type1":    type1,
+			"Type2":    type2,
+		},
+		neo4j.EagerResultTransformer, neo4j.ExecuteQueryWithDatabase(n.DataBase))
+	if err != nil {
+		log.CtxError(ctx, "查询关系异常[%v]\n", err)
+		return nil, err
+	}
+	relation := make([]*genrelation.Relation, 0, len(result.Records))
+	for i := range result.Records {
+		relationNode, _, err := neo4j.GetRecordValue[neo4j.Relationship](result.Records[i], "r2")
+		if err != nil {
+			log.CtxError(ctx, "GetRecordValue异常[%v]\n", err)
+			return nil, err
+		}
+
+		fromNode, _, err := neo4j.GetRecordValue[neo4j.Node](result.Records[i], "node2")
+		if err != nil {
+			log.CtxError(ctx, "GetRecordValue异常[%v]\n", err)
+			return nil, err
+		}
+		fromId, err := neo4j.GetProperty[string](fromNode, "name")
+		if err != nil {
+			log.CtxError(ctx, "GetRecordValue异常[%v]\n", err)
+			return nil, err
+		}
+		fromType, err := neo4j.GetProperty[int64](fromNode, "type")
+		if err != nil {
+			log.CtxError(ctx, "GetRecordValue异常[%v]\n", err)
+			return nil, err
+		}
+
+		toNode, _, err := neo4j.GetRecordValue[neo4j.Node](result.Records[i], "node3")
+		if err != nil {
+			log.CtxError(ctx, "GetRecordValue异常[%v]\n", err)
+			return nil, err
+		}
+		toId, err := neo4j.GetProperty[string](toNode, "name")
+		if err != nil {
+			log.CtxError(ctx, "GetRecordValue异常[%v]\n", err)
+			return nil, err
+		}
+		toType, err := neo4j.GetProperty[int64](toNode, "type")
+		if err != nil {
+			log.CtxError(ctx, "GetRecordValue异常[%v]\n", err)
+			return nil, err
+		}
+
+		createTime, err := neo4j.GetProperty[int64](relationNode, "createTime")
+		if err != nil {
+			log.CtxError(ctx, "GetRecordValue异常[%v]\n", err)
+			return nil, err
+		}
+
+		relation = append(relation, &genrelation.Relation{
+			FromType:     fromType,
+			FromId:       fromId,
+			ToType:       toType,
+			ToId:         toId,
+			RelationType: type2,
+			CreateTime:   createTime,
+		})
+	}
+	return relation, nil
+}
 
 func (n Neo4jMapper) MatchFromEdgesAndCount(ctx context.Context, fromType int64, fromId string, toType int64, relationType int64, options *pagination.PaginationOptions) ([]*genrelation.Relation, int64, error) {
 	options.EnsureSafe()

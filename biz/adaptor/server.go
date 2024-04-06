@@ -12,6 +12,10 @@ type RelationServerImpl struct {
 	RelationService service.RelationService
 }
 
+func (s *RelationServerImpl) GetRelationPaths(ctx context.Context, req *genrelation.GetRelationPathsReq) (res *genrelation.GetRelationPathsResp, err error) {
+	return s.RelationService.GetRelationPaths(ctx, req)
+}
+
 func (s *RelationServerImpl) GetRelationCount(ctx context.Context, req *genrelation.GetRelationCountReq) (res *genrelation.GetRelationCountResp, err error) {
 	return s.RelationService.GetRelationCount(ctx, req)
 }

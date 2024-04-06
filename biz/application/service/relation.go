@@ -16,6 +16,7 @@ type RelationService interface {
 	DeleteRelation(ctx context.Context, req *genrelation.DeleteRelationReq) (resp *genrelation.DeleteRelationResp, err error)
 	GetRelations(ctx context.Context, req *genrelation.GetRelationsReq) (resp *genrelation.GetRelationsResp, err error)
 	GetRelationCount(ctx context.Context, req *genrelation.GetRelationCountReq) (resp *genrelation.GetRelationCountResp, err error)
+	GetRelationPaths(ctx context.Context, req *genrelation.GetRelationPathsReq) (resp *genrelation.GetRelationPathsResp, err error)
 }
 
 var RelationSet = wire.NewSet(
@@ -27,6 +28,16 @@ type RelationServiceImpl struct {
 	Config        *config.Config
 	Redis         *redis.Redis
 	RelationModel relationmapper.RelationNeo4jMapper
+}
+
+func (s *RelationServiceImpl) GetRelationPaths(ctx context.Context, req *genrelation.GetRelationPathsReq) (resp *genrelation.GetRelationPathsResp, err error) {
+	resp = new(genrelation.GetRelationPathsResp)
+	p := pconvertor.PaginationOptionsToModelPaginationOptions(req.PaginationOptions)
+	resp.Relations, err = s.RelationModel.GetRelationPaths(ctx, req.FromType, req.FromId, req.EdgeType1, req.EdgeType2, p)
+	if err != nil {
+		return resp, err
+	}
+	return resp, nil
 }
 
 func (s *RelationServiceImpl) GetRelationCount(ctx context.Context, req *genrelation.GetRelationCountReq) (resp *genrelation.GetRelationCountResp, err error) {
