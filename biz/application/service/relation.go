@@ -17,6 +17,7 @@ type RelationService interface {
 	GetRelations(ctx context.Context, req *genrelation.GetRelationsReq) (resp *genrelation.GetRelationsResp, err error)
 	GetRelationCount(ctx context.Context, req *genrelation.GetRelationCountReq) (resp *genrelation.GetRelationCountResp, err error)
 	GetRelationPaths(ctx context.Context, req *genrelation.GetRelationPathsReq) (resp *genrelation.GetRelationPathsResp, err error)
+	DeleteNode(ctx context.Context, req *genrelation.DeleteNodeReq) (resp *genrelation.DeleteNodeResp, err error)
 }
 
 var RelationSet = wire.NewSet(
@@ -28,6 +29,14 @@ type RelationServiceImpl struct {
 	Config        *config.Config
 	Redis         *redis.Redis
 	RelationModel relationmapper.RelationNeo4jMapper
+}
+
+func (s *RelationServiceImpl) DeleteNode(ctx context.Context, req *genrelation.DeleteNodeReq) (resp *genrelation.DeleteNodeResp, err error) {
+	resp = new(genrelation.DeleteNodeResp)
+	if err = s.RelationModel.DeleteNode(ctx, req.NodeId, req.NodeType); err != nil {
+		return resp, err
+	}
+	return resp, nil
 }
 
 func (s *RelationServiceImpl) GetRelationPaths(ctx context.Context, req *genrelation.GetRelationPathsReq) (resp *genrelation.GetRelationPathsResp, err error) {

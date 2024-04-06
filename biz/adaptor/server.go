@@ -12,6 +12,10 @@ type RelationServerImpl struct {
 	RelationService service.RelationService
 }
 
+func (s *RelationServerImpl) DeleteNode(ctx context.Context, req *genrelation.DeleteNodeReq) (res *genrelation.DeleteNodeResp, err error) {
+	return s.RelationService.DeleteNode(ctx, req)
+}
+
 func (s *RelationServerImpl) GetRelationPaths(ctx context.Context, req *genrelation.GetRelationPathsReq) (res *genrelation.GetRelationPathsResp, err error) {
 	return s.RelationService.GetRelationPaths(ctx, req)
 }
